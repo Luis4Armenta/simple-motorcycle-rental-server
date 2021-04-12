@@ -3,7 +3,6 @@ import { IUserRepository } from '../IUserRepository'
 import mongoose from 'mongoose'
 import { User } from '../../models/userModel'
 import { IEncryptor } from '../../providers/IEncryptor'
-import { response } from 'express'
 import { IWebToken } from '../../providers/IWebToken'
 
 export class MongodbUserRepository implements IUserRepository {
@@ -11,41 +10,46 @@ export class MongodbUserRepository implements IUserRepository {
     this.connect()
   }
 
-  private async connect (): Promise<Boolean> {
-    return await mongoose.connect('mongodb//localhost:27017/motorcycles', { useNewUrlParser: true, useUnifiedTopology: true })
-      .then(() => true).catch(() => false)
+  private async connect (): Promise<void> {
+    mongoose.connect('mongodb://localhost/motorcycles', { useNewUrlParser: true, useUnifiedTopology: true })
+    const db = mongoose.connection
+    db.on('error', console.error.bind(console, 'connection error:'))
+    db.once('open', () => {
+      console.log('conexion abierta')
+    })
   }
 
   async register (name: string, email: string, password: string): Promise<boolean> {
     const newUser = new User({ name: name, email: email, password: this.encryptor.encrypt(password) })
+    console.log(newUser, 'new user')
     return await newUser.save().then(() => true).catch(() => false)
   }
 
   async login (email: string, password: string): Promise<any> {
-    User.findOne({ email: email }, (err: any, user: any) => {
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-      if (err) {
-        return response.status(404).json({
-          mesage: 'username does not exist'
-        })
+    return await User.findOne({ email: email }).then((user: any) => {
+      if (this.encryptor.compare(password, user.password)) {
+        return {
+          user: user.name,
+          acesstoken: this.webTokenFactory.sign(user._id)
+        }
       } else {
-        if (this.encryptor.compare(password, user.password)) {
-          return response.status(202).json({
-            user: user.name,
-            accessData: {
-              token: this.webTokenFactory.sign(user._id)
-            }
-          })
+        return {
+          user: '',
+          acesstoken: ''
         }
       }
     })
+      .catch(() => {
+        return { user: '', accessToken: '' }
+      })
   }
 
   async hasMotorcycle (token: string): Promise<boolean> {
     const payload: any = this.webTokenFactory.verify(token)
     const id = payload.id
-    return await User.findById(id).then((user: any) => {
-      return user.hasMotorcycle as boolean
-    }).catch(() => false)
+    return await User.findById(id)
+      .then((user: any) => {
+        return user.hasMotorcycle
+      }).catch(() => false)
   }
 }

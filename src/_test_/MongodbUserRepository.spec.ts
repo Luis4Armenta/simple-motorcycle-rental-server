@@ -2,16 +2,34 @@ import { BcryptEncryptor } from '../providers/implementations/BcryptEncryptor'
 import { JsonWebToken } from '../providers/implementations/JsonWebToken'
 import { MongodbUserRepository } from '../repositories/implementations/MongodbUserRepository'
 
-describe('mongodb user repository', () => {
-  const sut = new MongodbUserRepository(new BcryptEncryptor(), new JsonWebToken())
-  test('register method', () => {
-    expect(sut.register('example', 'example@email.com', 'password')).toBeTruthy()
-  })
-  test('login method', () => {
-    expect(sut.login('example@email.com', 'password')).toBeTruthy()
-  })
+describe('mongodb user respository - register method', () => {
+  const random = Math.round(Math.random() * 1000)
+  const newEmail = random.toString() + '@email.com'
+  const newName = random.toString()
 
-  // test('hasMotorcycle', () => {
-  //   expect(sut.hasMotorcycle()).toBeTruthy()
-  // })
+  const sut = new MongodbUserRepository(new BcryptEncryptor(), new JsonWebToken())
+  it('register method resolve', async () => {
+    expect.assertions(1)
+    return await expect(sut.register(newName, newEmail, 'password')).resolves.toBeTruthy()
+  })
+  it('register method reject', async () => {
+    // expect.assertions(1)
+    try {
+      await sut.register('example', 'example@email.com', 'password')
+    } catch (e) {
+      expect(e).toBeTruthy()
+    }
+  })
 })
+
+// describe('mongodb user respository - login method', () => {
+//   test('login method', () => {
+//     expect(sut.login('example@email.com', 'password')).toBeTruthy()
+//   })
+// })
+
+// describe('mongodb user repository - hasMotorcycle method', () => {
+//   test('hasMotorcycle', () => {
+//     expect(sut.hasMotorcycle()).toBeTruthy()
+//   })
+// })
