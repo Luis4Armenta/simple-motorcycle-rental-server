@@ -68,4 +68,20 @@ export class MongodbUserRepository implements IUserRepository {
       return 0
     }
   }
+
+  async returnMotorcycle (token: string): Promise<boolean> {
+    const payload: any = this.webTokenFactory.verify(token)
+    const id = payload.id
+    return await User.findByIdAndUpdate(id, { motorcycle: { motorcycleNumber: 0 } })
+      .then(() => true)
+      .catch(() => false)
+  }
+
+  async takeMotorcycle (token: string, motorcycleNumber: number): Promise<boolean> {
+    const payload: any = this.webTokenFactory.verify(token)
+    const id = payload.id
+    return await User.findByIdAndUpdate(id, { 'motorcycle.motorcycleNumber': motorcycleNumber })
+      .then(() => true)
+      .catch(() => false)
+  }
 }

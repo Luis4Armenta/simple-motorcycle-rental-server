@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { createUserController } from './useCases/createUser'
 import { hasMotorcycleController } from './useCases/hasMotocycle'
 import { loginUserController } from './useCases/loginUser'
+import { returnMotorcycleController } from './useCases/returnMotorcycle'
+import { takeMotorcycleController } from './useCases/takeMotorcycle'
 
 const router = Router()
 
@@ -15,6 +17,14 @@ router.post('/login', (request, response): any => {
 
 router.get('/hasmotorcycle', (request, response): any => {
   return hasMotorcycleController.handle(request, response)
+})
+
+router.get('/motorcycle/take', (request, response): any => {
+  return takeMotorcycleController.handle(request, response)
+})
+
+router.get('/motorcycle/return', (request, response): any => {
+  return returnMotorcycleController.handle(request, response)
 })
 
 export { router }
