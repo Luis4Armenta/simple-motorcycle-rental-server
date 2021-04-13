@@ -5,4 +5,7 @@ export interface IUserRepository {
   login: (email: string, password: string) => Promise<AccessDataDTO>
   register: (data: ICreateUserRequestDTO) => Promise<boolean>
   hasMotorcycle: (token: string) => Promise<boolean>
+  getMotorcycleNumber: (token: string) => Promise<number>
+  takeMotorcycle: (token: string, motorcycleNumber: number) => Promise<boolean>
+  returnMotorcycle: (token: string) => Promise<boolean>
 }

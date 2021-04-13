@@ -51,7 +51,37 @@ export class MongodbUserRepository implements IUserRepository {
     const id = payload.id
     return await User.findById(id)
       .then((user: any) => {
-        return user.hasMotorcycle
+        return user.motorcycle.hasMotorcycle
       }).catch(() => false)
+  }
+
+  async getMotorcycleNumber (token: string): Promise<number> {
+    if (await this.hasMotorcycle(token)) {
+      const payload: any = this.webTokenFactory.verify(token)
+      const id = payload.id
+      return await User.findById(id)
+        .then((user: any) => {
+          return user.motorcycle.motorcycleNumber
+        })
+        .catch(() => 0)
+    } else {
+      return 0
+    }
+  }
+
+  async returnMotorcycle (token: string): Promise<boolean> {
+    const payload: any = this.webTokenFactory.verify(token)
+    const id = payload.id
+    return await User.findByIdAndUpdate(id, { motorcycle: { motorcycleNumber: 0 } })
+      .then(() => true)
+      .catch(() => false)
+  }
+
+  async takeMotorcycle (token: string, motorcycleNumber: number): Promise<boolean> {
+    const payload: any = this.webTokenFactory.verify(token)
+    const id = payload.id
+    return await User.findByIdAndUpdate(id, { 'motorcycle.motorcycleNumber': motorcycleNumber })
+      .then(() => true)
+      .catch(() => false)
   }
 }
