@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import { User } from '../../models/userModel'
 import { IEncryptor } from '../../providers/IEncryptor'
 import { IWebToken } from '../../providers/IWebToken'
+import { ICreateUserRequestDTO } from '../../useCases/createUser/createUserDTO'
 
 export class MongodbUserRepository implements IUserRepository {
   constructor (private readonly encryptor: IEncryptor, private readonly webTokenFactory: IWebToken) {
@@ -19,8 +20,8 @@ export class MongodbUserRepository implements IUserRepository {
     })
   }
 
-  async register (name: string, email: string, password: string): Promise<boolean> {
-    const newUser = new User({ name: name, email: email, password: this.encryptor.encrypt(password) })
+  async register (data: ICreateUserRequestDTO): Promise<boolean> {
+    const newUser = new User({ name: data.name, email: data.email, password: this.encryptor.encrypt(data.password) })
     console.log(newUser, 'new user')
     return await newUser.save().then(() => true).catch(() => false)
   }

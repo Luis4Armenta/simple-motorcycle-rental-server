@@ -6,21 +6,18 @@ import { MongodbUserRepository } from './repositories/implementations/MongodbUse
 import { BcryptEncryptor } from './providers/implementations/BcryptEncryptor'
 import { JsonWebToken } from './providers/implementations/JsonWebToken'
 import getToken from './utils/helper'
+import { router } from './routes'
 
 const app = express()
 
 app.use(express.json())
 app.use(cors())
 app.use(morgan('dev'))
+
+app.use(router)
+
 app.get('/', (req, res) => {
   res.status(200).send('ok')
-})
-
-app.post('/register', async (req, res) => {
-  const userRepository = await new MongodbUserRepository(new BcryptEncryptor(), new JsonWebToken())
-  return await userRepository.register(req.body.name, req.body.email, req.body.password)
-    .then((success) => res.send(success))
-    .catch(() => res.send(false))
 })
 
 app.post('/login', async (req, res) => {
