@@ -20,15 +20,6 @@ app.get('/', (req, res) => {
   res.status(200).send('ok')
 })
 
-app.post('/login', async (req, res) => {
-  const email = req.body.email
-  const password = req.body.password
-  const userRepository = await new MongodbUserRepository(new BcryptEncryptor(), new JsonWebToken())
-  return await userRepository.login(email, password)
-    .then((token) => res.status(200).json(token))
-    .catch((token) => res.status(403).json(token))
-})
-
 app.get('/hasMotorcycle', async (req, res) => {
   const userRepository = await new MongodbUserRepository(new BcryptEncryptor(), new JsonWebToken())
 

@@ -5,6 +5,7 @@ import { User } from '../../models/userModel'
 import { IEncryptor } from '../../providers/IEncryptor'
 import { IWebToken } from '../../providers/IWebToken'
 import { ICreateUserRequestDTO } from '../../useCases/createUser/createUserDTO'
+import { AccessDataDTO } from '../../useCases/loginUser/accessDataDTO'
 
 export class MongodbUserRepository implements IUserRepository {
   constructor (private readonly encryptor: IEncryptor, private readonly webTokenFactory: IWebToken) {
@@ -26,17 +27,17 @@ export class MongodbUserRepository implements IUserRepository {
     return await newUser.save().then(() => true).catch(() => false)
   }
 
-  async login (email: string, password: string): Promise<any> {
+  async login (email: string, password: string): Promise<AccessDataDTO> {
     return await User.findOne({ email: email }).then((user: any) => {
       if (this.encryptor.compare(password, user.password)) {
         return {
           user: user.name,
-          acesstoken: this.webTokenFactory.sign(user._id)
+          accessToken: this.webTokenFactory.sign(user._id)
         }
       } else {
         return {
           user: '',
-          acesstoken: ''
+          accessToken: ''
         }
       }
     })

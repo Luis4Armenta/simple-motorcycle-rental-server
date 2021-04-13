@@ -3,19 +3,19 @@ import { JsonWebToken } from '../providers/implementations/JsonWebToken'
 import { MongodbUserRepository } from '../repositories/implementations/MongodbUserRepository'
 
 describe('mongodb user respository - register method', () => {
-  const random = Math.round(Math.random() * 1000)
+  const random = Math.random() * 1000
   const newEmail = random.toString() + '@email.com'
   const newName = random.toString()
 
   const sut = new MongodbUserRepository(new BcryptEncryptor(), new JsonWebToken())
   it('register method resolve', async () => {
     expect.assertions(1)
-    return await expect(sut.register(newName, newEmail, 'password')).resolves.toBeTruthy()
+    return await expect(sut.register({ name: newName, email: newEmail, password: 'password' })).resolves.toBeTruthy()
   })
   it('register method reject', async () => {
     // expect.assertions(1)
     try {
-      await sut.register('example', 'example@email.com', 'password')
+      await sut.register({ name: 'example', email: 'example@email.com', password: 'password' })
     } catch (e) {
       expect(e).toBeTruthy()
     }
