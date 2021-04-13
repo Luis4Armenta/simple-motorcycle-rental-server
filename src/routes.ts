@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { verifyToken } from './middlewares/auth.middleware'
 import { createUserController } from './useCases/createUser'
 import { hasMotorcycleController } from './useCases/hasMotocycle'
 import { loginUserController } from './useCases/loginUser'
@@ -13,7 +14,7 @@ router.post('/login', (request, response): any => {
   return loginUserController.handle(request, response)
 })
 
-router.get('/hasmotorcycle', (request, response): any => {
+router.get('/hasmotorcycle', verifyToken, (request, response): any => {
   return hasMotorcycleController.handle(request, response)
 })
 
