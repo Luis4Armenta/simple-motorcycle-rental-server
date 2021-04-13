@@ -13,18 +13,23 @@ export class MongodbUserRepository implements IUserRepository {
   }
 
   private async connect (): Promise<void> {
-    mongoose.connect('mongodb://localhost/motorcycles', { useNewUrlParser: true, useUnifiedTopology: true })
+    mongoose.connect('mongodb://localhost/motorcycles', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: true, useCreateIndex: true })
     const db = mongoose.connection
     db.on('error', console.error.bind(console, 'connection error:'))
     db.once('open', () => {
-      console.log('conexion abierta')
+      console.log('open connection')
     })
   }
 
   async register (data: ICreateUserRequestDTO): Promise<boolean> {
     const newUser = new User({ name: data.name, email: data.email, password: this.encryptor.encrypt(data.password) })
-    console.log(newUser, 'new user')
-    return await newUser.save().then(() => true).catch(() => false)
+    if (await this.emailAlreadyExists(data.email)) {
+      return false
+    } else {
+      return await newUser.save()
+        .then(() => true)
+        .catch(() => false)
+    }
   }
 
   async login (email: string, password: string): Promise<AccessDataDTO> {
@@ -46,20 +51,16 @@ export class MongodbUserRepository implements IUserRepository {
       })
   }
 
-  async hasMotorcycle (token: string): Promise<boolean> {
-    const payload: any = this.webTokenFactory.verify(token)
-    const id = payload.id
-    return await User.findById(id)
+  async hasMotorcycle (userId: string): Promise<boolean> {
+    return await User.findById(userId)
       .then((user: any) => {
         return user.motorcycle.hasMotorcycle
       }).catch(() => false)
   }
 
-  async getMotorcycleNumber (token: string): Promise<number> {
-    if (await this.hasMotorcycle(token)) {
-      const payload: any = this.webTokenFactory.verify(token)
-      const id = payload.id
-      return await User.findById(id)
+  async getMotorcycleNumber (userId: string): Promise<number> {
+    if (await this.hasMotorcycle(userId)) {
+      return await User.findById(userId)
         .then((user: any) => {
           return user.motorcycle.motorcycleNumber
         })
@@ -69,19 +70,40 @@ export class MongodbUserRepository implements IUserRepository {
     }
   }
 
-  async returnMotorcycle (token: string): Promise<boolean> {
-    const payload: any = this.webTokenFactory.verify(token)
-    const id = payload.id
-    return await User.findByIdAndUpdate(id, { motorcycle: { motorcycleNumber: 0 } })
+  async returnMotorcycle (userId: string): Promise<boolean> {
+    return await User.findByIdAndUpdate(userId, { motorcycle: { motorcycleNumber: 0 } })
       .then(() => true)
       .catch(() => false)
   }
 
-  async takeMotorcycle (token: string, motorcycleNumber: number): Promise<boolean> {
-    const payload: any = this.webTokenFactory.verify(token)
-    const id = payload.id
-    return await User.findByIdAndUpdate(id, { 'motorcycle.motorcycleNumber': motorcycleNumber })
-      .then(() => true)
+  async takeMotorcycle (userId: string, motorcycleNumber: number): Promise<boolean> {
+    return await User.findByIdAndUpdate(userId, {
+      motorcycle: {
+        motorcycleNumber: motorcycleNumber,
+        hasMotorcycle: true
+      }
+    })
+      .then(user => {
+        if (user != null) {
+          return true
+        } else {
+          return false
+        }
+      })
+      .catch(() => {
+        return false
+      })
+  }
+
+  private async emailAlreadyExists (email: string): Promise<boolean> {
+    return await User.findOne({ email: email })
+      .then(user => {
+        if (user != null) {
+          return true
+        } else {
+          return false
+        }
+      })
       .catch(() => false)
   }
 }
