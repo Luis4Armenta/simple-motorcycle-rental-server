@@ -16,15 +16,15 @@ router.post('/login', (request, response): any => {
   return loginUserController.handle(request, response)
 })
 
-router.get('/hasmotorcycle', verifyToken, (request, response): any => {
+router.get('/motorcycle/hasmotorcycle', verifyToken, (request, response): any => {
   return hasMotorcycleController.handle(request, response)
 })
 
-router.get('/motorcycle/take', (request, response): any => {
+router.get('/motorcycle/take', verifyToken, (request, response): any => {
   return takeMotorcycleController.handle(request, response)
 })
 
-router.get('/motorcycle/return', (request, response): any => {
+router.get('/motorcycle/return', verifyToken, (request, response): any => {
   return returnMotorcycleController.handle(request, response)
 })
 
