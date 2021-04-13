@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { verifyToken } from './middlewares/auth.middleware'
 import { createUserController } from './useCases/createUser'
+import { getMotorycycleNumberController } from './useCases/getMotorcycleNumber'
 import { hasMotorcycleController } from './useCases/hasMotocycle'
 import { loginUserController } from './useCases/loginUser'
 import { returnMotorcycleController } from './useCases/returnMotorcycle'
@@ -26,6 +27,10 @@ router.get('/motorcycle/take', verifyToken, (request, response): any => {
 
 router.get('/motorcycle/return', verifyToken, (request, response): any => {
   return returnMotorcycleController.handle(request, response)
+})
+
+router.get('/motorcycle/number', verifyToken, (request, response): any => {
+  return getMotorycycleNumberController.handle(request, response)
 })
 
 export { router }
