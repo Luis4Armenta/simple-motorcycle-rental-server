@@ -6,6 +6,6 @@ const motorcycleSchema = new Schema({
   available: { type: Number, default: 8 }
 })
 
-const Motorcycle = model('User', motorcycleSchema)
+const Motorcycle = model('Motorcycle', motorcycleSchema)
 
 export { Motorcycle }
