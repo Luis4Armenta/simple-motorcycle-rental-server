@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { IUserRepository } from '../IUserRepository'
-import mongoose from 'mongoose'
 import { User } from '../../models/userModel'
 import { IEncryptor } from '../../providers/IEncryptor'
 import { IWebToken } from '../../providers/IWebToken'
@@ -8,18 +6,7 @@ import { ICreateUserRequestDTO } from '../../useCases/createUser/createUserDTO'
 import { AccessDataDTO } from '../../useCases/loginUser/accessDataDTO'
 
 export class MongodbUserRepository implements IUserRepository {
-  constructor (private readonly encryptor: IEncryptor, private readonly webTokenFactory: IWebToken) {
-    this.connect()
-  }
-
-  private async connect (): Promise<void> {
-    mongoose.connect('mongodb://localhost/motorcycles', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: true, useCreateIndex: true })
-    const db = mongoose.connection
-    db.on('error', console.error.bind(console, 'connection error:'))
-    db.once('open', () => {
-      console.log('open connection')
-    })
-  }
+  constructor (private readonly encryptor: IEncryptor, private readonly webTokenFactory: IWebToken) { }
 
   async register (data: ICreateUserRequestDTO): Promise<boolean> {
     const newUser = new User({ name: data.name, email: data.email, password: this.encryptor.encrypt(data.password) })
