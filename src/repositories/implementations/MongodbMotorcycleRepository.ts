@@ -1,23 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { IMotorcycleRepository } from '../IMotorcycleRepository'
-import mongoose from 'mongoose'
 import { Motorcycle } from '../../models/motorcycleModel'
 
 export class MongodbMotorcycleRepository implements IMotorcycleRepository {
-  constructor () {
-    this.connect()
-  }
-
-  private async connect (): Promise<void> {
-    mongoose.connect('mongodb://localhost/motorcycles', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: true, useCreateIndex: true })
-    const db = mongoose.connection
-    db.on('error', console.error.bind(console, 'connection error:'))
-    db.once('open', () => {
-      console.log('open connection')
-    })
-  }
-
   async getAllMotorcycles (): Promise<any> {
     return await Motorcycle.find({})
       .then(docs => docs)
@@ -46,5 +32,43 @@ export class MongodbMotorcycleRepository implements IMotorcycleRepository {
         }
       })
       .catch(() => -1)
+  }
+
+  async reduceAvailability (scheduleNumber: number): Promise<boolean> {
+    if (await this.getAvailableMotorcycles(scheduleNumber) === 0) {
+      return false
+    } else {
+      return await Motorcycle.findOneAndUpdate({
+        scheduleNumber: scheduleNumber
+      }, { $inc: { available: -1 } })
+        .then((res) => {
+          if (res != null) {
+            return true
+          } else {
+            return false
+          }
+        })
+        .catch(() => {
+          return false
+        })
+    }
+  }
+
+  async increaseAvailability (scheduleNumber: number): Promise<boolean> {
+    if (await this.getAvailableMotorcycles(scheduleNumber) >= 8) {
+      return false
+    } else {
+      return await Motorcycle.findOneAndUpdate({
+        scheduleNumber: scheduleNumber
+      }, { $inc: { available: 1 } })
+        .then((res) => {
+          if (res != null) {
+            return true
+          } else {
+            return false
+          }
+        })
+        .catch(() => false)
+    }
   }
 }
