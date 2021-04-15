@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import request from 'supertest'
 import { Server as IServer } from 'node:http'
-import { server as myServer } from '../server'
+import { httpServer as myServer } from '../server'
 
 describe('loading express', () => {
   let server: IServer
