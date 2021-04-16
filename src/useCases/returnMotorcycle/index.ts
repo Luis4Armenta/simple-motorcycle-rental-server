@@ -13,7 +13,7 @@ const tokenService = new JsonWebToken()
 const mongodbUserRepository: IUserRepository = new MongodbUserRepository(encryptor, tokenService)
 const mongodbMotorcycleRepository: IMotorcycleRepository = new MongodbMotorcycleRepository()
 
-const returnMotorcycleUseCase = new ReturnMotorcycleUseCase(mongodbUserRepository, mongodbMotorcycleRepository)
+export const returnMotorcycleUseCase = new ReturnMotorcycleUseCase(mongodbUserRepository, mongodbMotorcycleRepository)
 const returnMotorcycleController = new ReturnMotorcycleController(returnMotorcycleUseCase)
 
 export { returnMotorcycleController }
