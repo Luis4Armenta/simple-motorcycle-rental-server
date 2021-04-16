@@ -11,7 +11,7 @@ export class ReturnMotorcycleUseCase {
     if (await this.userRepository.hasMotorcycle(userId)) {
       return await this.userRepository.getMotorcycleNumber(userId)
         .then(async (scheduleNumber) => {
-          if (scheduleNumber >= 8) {
+          if (scheduleNumber >= 24) {
             return false
           } else {
             if (await this.userRepository.returnMotorcycle(userId) && await this.motorcycleRepository.increaseAvailability(scheduleNumber)) {
