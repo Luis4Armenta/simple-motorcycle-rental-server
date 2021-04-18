@@ -4,21 +4,25 @@ import getToken from '../utils/helper'
 
 export function verifyToken (request: Request | any, response: Response, next: NextFunction): any {
   try {
-    const header = request.headers.authorization
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    if (!header) {
-      return response.status(401).send('deauthenticate request')
+    if (!request.headers || !request.headers.authorization) {
+      response.statusCode = 401
+      return response.send('deauthenticate request')
     }
 
+    const header = request.headers.authorization
+
     const token = getToken(header)
-    if (token === null) {
-      return response.status(401).send('deauthenticate request')
+    if (token === '') {
+      response.statusCode = 401
+      return response.send('deauthenticate request')
     }
 
     const payload: any = new JsonWebToken().verify(token)
     request.userId = payload.id
     return next()
   } catch (error) {
-    return response.status(401).send('deauthenticate request')
+    response.statusCode = 401
+    return response.send('deauthenticate request')
   }
 }
