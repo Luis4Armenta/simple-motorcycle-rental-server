@@ -1,5 +1,10 @@
 function getToken (authorizationHeader: string): string {
-  return authorizationHeader.split(' ')[1]
+  const words = authorizationHeader.split(' ')
+  if (words.length === 2) {
+    return words[1]
+  } else {
+    return ''
+  }
 }
 
 export default getToken
