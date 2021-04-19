@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 // import mongoose, { Document } from 'mongoose'
 // import { User } from '../../models/userModel'
-import mongoose, { Model, model, Schema, Document } from 'mongoose'
+import mongoose, { Model, model, Schema } from 'mongoose'
+import { IUser } from '../../interfaces/IUser'
 import { MongodbUserRepository } from '../../repositories/implementations/MongodbUserRepository'
 import { ICreateUserRequestDTO } from '../../useCases/createUser/createUserDTO'
 
@@ -100,8 +101,9 @@ describe('MongoDB User Repository', () => {
   })
 
   describe('login', () => {
+    let mock: IUser
     beforeEach(async () => {
-      const mock = new User({
+      mock = new User({
         name: 'john',
         email: 'example@email.com',
         password: 'password'
@@ -119,7 +121,7 @@ describe('MongoDB User Repository', () => {
 
     it('with email', async () => {
       const user = await mongodbUserRepository.login('example@email.com')
-      expect(user).toBeNull()
+      expect(user).not.toBe(mock)
     })
   })
 
@@ -293,13 +295,3 @@ describe('MongoDB User Repository', () => {
     })
   })
 })
-
-interface IUser extends Document {
-  name: string
-  email: string
-  password: string
-  motorcycle: {
-    hasMotorcycle: boolean
-    motorcycleNumber: number
-  }
-}
