@@ -9,6 +9,6 @@ export class GetAllMotorcyclesController {
       .then(motorcycles => {
         return response.status(200).json(motorcycles)
       })
-      .catch(() => response.status(200).send({}))
+      .catch(() => response.status(400).send({}))
   }
 }

@@ -7,7 +7,7 @@ export class LoginUserController {
 
   async handle (request: Request, response: Response): Promise<Response> {
     const data: ILoginUserRequestDTO = { email: request.body.email, password: request.body.password }
-    return await this.loginUserUSeCase.execute(data)
+    return await this.loginUserUSeCase.execute(data.email, data.password)
       .then((token) => response.status(200).json(token))
       .catch((token) => response.status(403).json(token))
   }

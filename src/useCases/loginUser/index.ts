@@ -9,9 +9,9 @@ import { LoginUserController } from './loginUserController'
 const bcrypt: IEncryptor = new BcryptEncryptor()
 const jwt: IWebToken = new JsonWebToken()
 
-const mongodbUserRepository = new MongodbUserRepository(bcrypt, jwt)
+const mongodbUserRepository = new MongodbUserRepository()
 
-const loginUserUseCase = new LoginUserUseCase(mongodbUserRepository)
+const loginUserUseCase = new LoginUserUseCase(mongodbUserRepository, bcrypt, jwt)
 const loginUserController = new LoginUserController(loginUserUseCase)
 
 export { loginUserController }

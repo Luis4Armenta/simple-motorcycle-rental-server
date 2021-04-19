@@ -1,4 +1,5 @@
-import { model, Schema } from 'mongoose'
+import { Model, model, Schema } from 'mongoose'
+import { IUser } from '../interfaces/IUser'
 
 const userSchema = new Schema({
   name: { type: String, required: true },
@@ -10,5 +11,5 @@ const userSchema = new Schema({
   }
 })
 
-const User = model('User', userSchema)
+const User: Model<IUser> = model('User', userSchema)
 export { User }

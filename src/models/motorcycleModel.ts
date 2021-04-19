@@ -1,4 +1,5 @@
-import { Schema, model } from 'mongoose'
+import { Schema, model, Model } from 'mongoose'
+import { IMotorcycle } from '../interfaces/IMotorcycle'
 
 const motorcycleSchema = new Schema({
   scheduleNumber: { type: Number, max: 24, min: 0, unique: true },
@@ -6,6 +7,6 @@ const motorcycleSchema = new Schema({
   available: { type: Number, default: 8 }
 })
 
-const Motorcycle = model('Motorcycle', motorcycleSchema)
+const Motorcycle: Model<IMotorcycle> = model('Motorcycle', motorcycleSchema)
 
 export { Motorcycle }

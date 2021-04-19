@@ -1,15 +1,11 @@
 import { IUserRepository } from '../IUserRepository'
 import { User } from '../../models/userModel'
-import { IEncryptor } from '../../providers/IEncryptor'
-import { IWebToken } from '../../providers/IWebToken'
 import { ICreateUserRequestDTO } from '../../useCases/createUser/createUserDTO'
-import { AccessDataDTO } from '../../useCases/loginUser/accessDataDTO'
+import { IUser } from '../../interfaces/IUser'
 
 export class MongodbUserRepository implements IUserRepository {
-  constructor (private readonly encryptor: IEncryptor, private readonly webTokenFactory: IWebToken) { }
-
   async register (data: ICreateUserRequestDTO): Promise<boolean> {
-    const newUser = new User({ name: data.name, email: data.email, password: this.encryptor.encrypt(data.password) })
+    const newUser = new User({ name: data.name, email: data.email, password: data.password })
     if (await this.emailAlreadyExists(data.email)) {
       return false
     } else {
@@ -19,30 +15,25 @@ export class MongodbUserRepository implements IUserRepository {
     }
   }
 
-  async login (email: string, password: string): Promise<AccessDataDTO> {
-    return await User.findOne({ email: email }).then((user: any) => {
-      if (this.encryptor.compare(password, user.password)) {
-        return {
-          user: user.name,
-          accessToken: this.webTokenFactory.sign(user._id)
-        }
-      } else {
-        return {
-          user: '',
-          accessToken: ''
-        }
-      }
-    })
-      .catch(() => {
-        return { user: '', accessToken: '' }
-      })
+  async login (email: string): Promise<IUser | null> {
+    const user = await User.findOne({ email: email })
+    if (user != null) {
+      return user
+    } else {
+      return null
+    }
   }
 
   async hasMotorcycle (userId: string): Promise<boolean> {
     return await User.findById(userId)
-      .then((user: any) => {
-        return user.motorcycle.hasMotorcycle
-      }).catch(() => false)
+      .then(user => {
+        if (user !== null) {
+          return user.motorcycle.hasMotorcycle
+        } else {
+          return false
+        }
+      })
+      .catch(() => false)
   }
 
   async getMotorcycleNumber (userId: string): Promise<number> {
@@ -58,8 +49,14 @@ export class MongodbUserRepository implements IUserRepository {
   }
 
   async returnMotorcycle (userId: string): Promise<boolean> {
-    return await User.findByIdAndUpdate(userId, { motorcycle: { motorcycleNumber: 0 } })
-      .then(() => true)
+    return await User.findOneAndUpdate({ _id: userId }, { motorcycle: { hasMotorcycle: false, motorcycleNumber: 0 } })
+      .then(user => {
+        if (user != null) {
+          return true
+        } else {
+          return false
+        }
+      })
       .catch(() => false)
   }
 

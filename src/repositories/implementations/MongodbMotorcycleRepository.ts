@@ -2,17 +2,18 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { IMotorcycleRepository } from '../IMotorcycleRepository'
 import { Motorcycle } from '../../models/motorcycleModel'
+import { IMotorcycle } from '../../interfaces/IMotorcycle'
 
 export class MongodbMotorcycleRepository implements IMotorcycleRepository {
-  async getAllMotorcycles (): Promise<any> {
+  async getAllMotorcycles (): Promise<IMotorcycle[]> {
     return await Motorcycle.find({})
-      .then(docs => docs)
-      .catch(null)
+      .then(motorcycles => motorcycles)
+      .catch(() => [])
   }
 
   async getQuantityMotorcycles (scheduleNumber: number): Promise<number> {
     return await Motorcycle.findOne({ scheduleNumber: scheduleNumber })
-      .then((motorcycle: any) => {
+      .then(motorcycle => {
         if (motorcycle != null) {
           return motorcycle.quantity
         } else {
@@ -24,7 +25,7 @@ export class MongodbMotorcycleRepository implements IMotorcycleRepository {
 
   async getAvailableMotorcycles (scheduleNumber: number): Promise<number> {
     return await Motorcycle.findOne({ scheduleNumber: scheduleNumber })
-      .then((motorcycle: any) => {
+      .then(motorcycle => {
         if (motorcycle != null) {
           return motorcycle.available
         } else {
@@ -35,7 +36,7 @@ export class MongodbMotorcycleRepository implements IMotorcycleRepository {
   }
 
   async reduceAvailability (scheduleNumber: number): Promise<boolean> {
-    if (await this.getAvailableMotorcycles(scheduleNumber) === 0) {
+    if (await this.getAvailableMotorcycles(scheduleNumber) <= 0) {
       return false
     } else {
       return await Motorcycle.findOneAndUpdate({
