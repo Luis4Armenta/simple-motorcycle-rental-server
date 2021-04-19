@@ -5,20 +5,28 @@ import { IUser } from '../../interfaces/IUser'
 
 export class MongodbUserRepository implements IUserRepository {
   async register (data: ICreateUserRequestDTO): Promise<boolean> {
-    const newUser = new User({ name: data.name, email: data.email, password: data.password })
-    if (await this.emailAlreadyExists(data.email)) {
-      return false
+    if (data.name !== '' && data.email !== '' && data.password !== '') {
+      const newUser = new User({ name: data.name, email: data.email, password: data.password })
+      if (await this.emailAlreadyExists(data.email)) {
+        return false
+      } else {
+        return await newUser.save()
+          .then(() => true)
+          .catch(() => false)
+      }
     } else {
-      return await newUser.save()
-        .then(() => true)
-        .catch(() => false)
+      return false
     }
   }
 
   async login (email: string): Promise<IUser | null> {
-    const user = await User.findOne({ email: email })
-    if (user != null) {
-      return user
+    if (email !== '') {
+      const user = await User.findOne({ email: email })
+      if (user != null) {
+        return user
+      } else {
+        return null
+      }
     } else {
       return null
     }
@@ -49,34 +57,46 @@ export class MongodbUserRepository implements IUserRepository {
   }
 
   async returnMotorcycle (userId: string): Promise<boolean> {
-    return await User.findOneAndUpdate({ _id: userId }, { motorcycle: { hasMotorcycle: false, motorcycleNumber: 0 } })
-      .then(user => {
-        if (user != null) {
-          return true
-        } else {
-          return false
-        }
-      })
-      .catch(() => false)
+    if (await this.hasMotorcycle(userId)) {
+      return await User.findOneAndUpdate({ _id: userId }, { motorcycle: { hasMotorcycle: false, motorcycleNumber: 0 } })
+        .then(user => {
+          if (user != null) {
+            return true
+          } else {
+            return false
+          }
+        })
+        .catch(() => false)
+    } else {
+      return false
+    }
   }
 
   async takeMotorcycle (userId: string, motorcycleNumber: number): Promise<boolean> {
-    return await User.findByIdAndUpdate(userId, {
-      motorcycle: {
-        motorcycleNumber: motorcycleNumber,
-        hasMotorcycle: true
-      }
-    })
-      .then(user => {
-        if (user != null) {
-          return true
-        } else {
-          return false
-        }
-      })
-      .catch(() => {
+    if (userId !== '' && (motorcycleNumber > 0 && motorcycleNumber < 25)) {
+      if (!await this.hasMotorcycle(userId)) {
+        return await User.findByIdAndUpdate(userId, {
+          motorcycle: {
+            motorcycleNumber: motorcycleNumber,
+            hasMotorcycle: true
+          }
+        })
+          .then(user => {
+            if (user != null) {
+              return true
+            } else {
+              return false
+            }
+          })
+          .catch(() => {
+            return false
+          })
+      } else {
         return false
-      })
+      }
+    } else {
+      return false
+    }
   }
 
   private async emailAlreadyExists (email: string): Promise<boolean> {
